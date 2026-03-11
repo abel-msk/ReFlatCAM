@@ -44,6 +44,8 @@ from multiprocessing import Pool
 import socket
 import argparse
 
+from sys import argv
+
 # ####################################################################################################################
 # ###################################      Imports part of FlatCAM       #############################################
 # ####################################################################################################################
@@ -142,32 +144,47 @@ class App(QtCore.QObject):
     # ###############################################################################################################
     # #################################### Get Cmd Line Options #####################################################
     # ###############################################################################################################
+    log.debug("+++  Parse arguments.")
+    is_in_thread = False
+    for p in argv[1:]:
+        if p == "--multiprocessing-fork":
+            is_in_thread = True
+            break
 
-    parser = argparse.ArgumentParser(
-        description='2D Computer-Aided PCB Manufacturing for CNC',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='Usage examples:\n'
-            f'{basename(sys.argv[0])} --shellfile=<cmd_line_shellfile>\n' \
-            f'{basename(sys.argv[0])} --shellvar=<1,\'C:\\path\',23>\n' \
-            f'{basename(sys.argv[0])} --headless'
-        )
-    parser.add_argument('--shellfile')
-    parser.add_argument('--shellvar')
-    parser.add_argument('--headless', action='store_true')
-    parser.add_argument('-V', '--version', action='store_true', help='show version')
-    parser.add_argument('misc', nargs='*', help='commands: quit, exit, save; file path: .FlatPrj, .FlatConfig, .FlatScript, .TCL')
-    args = parser.parse_args()
-    del parser
+    if is_in_thread:
 
-    if args.version:
-        print(version)
-        sys.exit(0)
+        parser = argparse.ArgumentParser(
+            description='2D Computer-Aided PCB Manufacturing for CNC',
+            formatter_class=argparse.RawDescriptionHelpFormatter,
+            epilog='Usage examples:\n'
+                f'{basename(sys.argv[0])} --shellfile=<cmd_line_shellfile>\n' \
+                f'{basename(sys.argv[0])} --shellvar=<1,\'C:\\path\',23>\n' \
+                f'{basename(sys.argv[0])} --headless'
+            )
+        parser.add_argument('--shellfile')
+        parser.add_argument('--shellvar')
+        parser.add_argument('--headless', action='store_true')
+        parser.add_argument('-V', '--version', action='store_true', help='show version')
+        parser.add_argument('misc', nargs='*', help='commands: quit, exit, save; file path: .FlatPrj, .FlatConfig, .FlatScript, .TCL')
+        args = parser.parse_args()
+        del parser
 
-    cmd_line_shellfile = args.shellfile
-    cmd_line_shellvar = args.shellvar
-    cmd_line_headless = args.headless
-    args = args.misc
-    log.info(f'{args=}')
+        if args.version:
+            print(version)
+            sys.exit(0)
+
+        cmd_line_shellfile = args.shellfile
+        cmd_line_shellvar = args.shellvar
+        cmd_line_headless = args.headless
+        args = args.misc
+        log.info(f'{args=}')
+
+    else:
+        cmd_line_shellfile = False
+        cmd_line_shellvar = False
+        cmd_line_headless = False
+        args = []
+    # log.debug("+++  Delete parser. cmd_line_headless=%s", args.headless)
 
     engine = '3D'
 

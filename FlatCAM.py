@@ -11,7 +11,6 @@ from app_Main import App
 from appGUI import VisPyPatches
 from settings import hdpi, style
 
-
 if sys.platform == "win32":
     # cx_freeze 'module win32' workaround
     pass

@@ -1,5 +1,6 @@
 import importlib
 import importlib.util
+import os
 import pkgutil
 import sys
 from pathlib import Path
@@ -70,21 +71,22 @@ import tclCommands.TclCommandSubtractPoly
 import tclCommands.TclCommandSubtractRectangle
 import tclCommands.TclCommandVersion
 import tclCommands.TclCommandWriteGCode
+from appLogger import getLogger
+log = getLogger('base')
 
 __all__ = []
 
 for loader, module_name, is_pkg in pkgutil.walk_packages(__path__):
-    module_path = Path(loader.path) / (module_name + ".py")
-    spec = importlib.util.spec_from_file_location(module_name, module_path)
-    # # module = loader.find_module(name).load_module(name)
-    # module = importlib.import_module(module_name)
+    if getattr(sys, 'frozen', False):
+        spec = loader.find_spec(module_name)
+    else:
+        module_path = Path(loader.path) / (module_name + ".py")
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+
     module = importlib.util.module_from_spec(spec)
     sys.modules[module_name] = module
     spec.loader.exec_module(module)
     __all__.append(module_name)
-    # pass
-
-
 
 def register_all_commands(app, commands):
     """

@@ -411,7 +411,7 @@ def getsvggeo(node, object_type, root=None, units='MM', res=64, factor=1.0):
 	if root is None:
 		root = node
 
-	kind = re.search('(?:\{.*\})?(.*)$', node.tag).group(1)
+	kind = re.search(r'(?:\{.*\})?(.*)$', node.tag).group(1)
 	geo = []
 
 	# Recurse
@@ -511,7 +511,7 @@ def getsvgtext(node, object_type, units='MM'):
 	:return:            List of Shapely geometry
 	:rtype:             list
 	"""
-	kind = re.search('(?:\{.*\})?(.*)$', node.tag).group(1)
+	kind = re.search(r'(?:\{.*\})?(.*)$', node.tag).group(1)
 	geo = []
 
 	# Recurse
