@@ -1,10 +1,15 @@
 #!/bin/bash
+die() {
+    local exit_code=${2:-1} # Use argument 2 as exit code, default to 1 if not provided
+    echo "$0: ERROR: $1" >&2 # Print error message to stderr
+    exit "$exit_code" # Exit the script with the specified code
+}
 SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 echo "The script is running from: $SCRIPT_DIR"
 #parent="${SCRIPT_DIR%/*}"
 #$FLATCAM_PATH="${parent%/*}"
 FLATCAM_PATH="${SCRIPT_DIR%/*}"
-cd $FLATCAM_PATH
+cd $FLATCAM_PATH || die "Incorrect path $FLATCAM_PATH"
 
 #python3.14 -m venv .venv
 #source .venv/bin/activate
