@@ -8,7 +8,7 @@ source   $FLATCAM_PATH/.venv/bin/activate
 #pyinstaller  -F --onefile --windowed  -y  --clean --name="ReFlatCAM" --icon="$SCRIPT_DIR/resources/flatcam_icon256.icns" ./FlatCAM.py
 # help_bin = pkgutil.get_data( 'helpmod', 'help_data.txt' )
 
-pyinstaller  --onedir --windowed  -y  --clean   --name="ReFlatCAM" \
+pyinstaller  --windowed  --onedir  -y  --clean   --name="ReFlatCAM" \
   --collect-all vispy  --collect-all language_data --collect-all rasterio \
   --add-data $FLATCAM_PATH/tclCommands/*:tclCommands  \
   --add-data $FLATCAM_PATH/translate/*:translate \

@@ -2,21 +2,13 @@ import sys
 import os
 import signal
 from multiprocessing import freeze_support
-from PyQt5.QtCore import Qt, QTimer
-from PyQt5.QtWidgets import QApplication
-# FlatCAM imports
-from appLogger import getLogger
-from app_Main import App
-# import  app_Main
-from appGUI import VisPyPatches
-from settings import hdpi, style
+
 
 if sys.platform == "win32":
     # cx_freeze 'module win32' workaround
     pass
 
 MIN_VERSION_MAJOR, MIN_VERSION_MINOR = 3, 10
-
 
 def debug_trace():
     '''Set a tracepoint in the Python debugger that works with Qt'''
@@ -51,7 +43,7 @@ def main():
     # All X11 calling should be thread safe otherwise we have strange issues
     # QtCore.QCoreApplication.setAttribute(QtCore.Qt.AA_X11InitThreads)
     # NOTE: Never talk to the GUI from threads! This is why I commented the above.
-    freeze_support()
+    # freeze_support()
 
     setup_keyboard_interrupt_handling()
 
@@ -66,7 +58,7 @@ def main():
     VisPyPatches.apply_patches()
 
     # apply High DPI support
-    if(hdpi_support := hdpi()):
+    if hdpi_support := hdpi():
         if hdpi_support == 2:
             log.debug('EnableHighDpiScaling=True')
             os.environ["QT_AUTO_SCREEN_SCALE_FACTOR"] = "1"
@@ -79,11 +71,20 @@ def main():
     app = QApplication(sys.argv)
 
     # apply Qt style if defined
-    if(s := style()):
+    if s := style():
         app.setStyle(s)
 
     fc = App(qapp=app)
     sys.exit(app.exec_())
 
 if __name__ == '__main__':
+    freeze_support()
+    from PyQt5.QtCore import Qt, QTimer
+    from PyQt5.QtWidgets import QApplication
+    # FlatCAM imports
+    from appLogger import getLogger
+    from app_Main import App
+    # import  app_Main
+    from appGUI import VisPyPatches
+    from settings import hdpi, style
     main()

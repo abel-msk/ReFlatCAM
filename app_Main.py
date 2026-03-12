@@ -6,7 +6,7 @@
 # MIT Licence                                               #
 # Modified by Marius Stanciu (2019)                         #
 # ###########################################################
-
+import multiprocessing
 # ##########################################################
 # File modified by: vika-sonne, 2023                       #
 # ##########################################################
@@ -144,47 +144,32 @@ class App(QtCore.QObject):
     # ###############################################################################################################
     # #################################### Get Cmd Line Options #####################################################
     # ###############################################################################################################
-    log.debug("+++  Parse arguments.")
-    is_in_thread = False
-    for p in argv[1:]:
-        if p == "--multiprocessing-fork":
-            is_in_thread = True
-            break
 
-    if is_in_thread:
+    parser = argparse.ArgumentParser(
+        description='2D Computer-Aided PCB Manufacturing for CNC',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog='Usage examples:\n'
+            f'{basename(sys.argv[0])} --shellfile=<cmd_line_shellfile>\n' \
+            f'{basename(sys.argv[0])} --shellvar=<1,\'C:\\path\',23>\n' \
+            f'{basename(sys.argv[0])} --headless'
+        )
+    parser.add_argument('--shellfile')
+    parser.add_argument('--shellvar')
+    parser.add_argument('--headless', action='store_true')
+    parser.add_argument('-V', '--version', action='store_true', help='show version')
+    parser.add_argument('misc', nargs='*', help='commands: quit, exit, save; file path: .FlatPrj, .FlatConfig, .FlatScript, .TCL')
+    args = parser.parse_args()
+    del parser
 
-        parser = argparse.ArgumentParser(
-            description='2D Computer-Aided PCB Manufacturing for CNC',
-            formatter_class=argparse.RawDescriptionHelpFormatter,
-            epilog='Usage examples:\n'
-                f'{basename(sys.argv[0])} --shellfile=<cmd_line_shellfile>\n' \
-                f'{basename(sys.argv[0])} --shellvar=<1,\'C:\\path\',23>\n' \
-                f'{basename(sys.argv[0])} --headless'
-            )
-        parser.add_argument('--shellfile')
-        parser.add_argument('--shellvar')
-        parser.add_argument('--headless', action='store_true')
-        parser.add_argument('-V', '--version', action='store_true', help='show version')
-        parser.add_argument('misc', nargs='*', help='commands: quit, exit, save; file path: .FlatPrj, .FlatConfig, .FlatScript, .TCL')
-        args = parser.parse_args()
-        del parser
+    if args.version:
+        print(version)
+        sys.exit(0)
 
-        if args.version:
-            print(version)
-            sys.exit(0)
-
-        cmd_line_shellfile = args.shellfile
-        cmd_line_shellvar = args.shellvar
-        cmd_line_headless = args.headless
-        args = args.misc
-        log.info(f'{args=}')
-
-    else:
-        cmd_line_shellfile = False
-        cmd_line_shellvar = False
-        cmd_line_headless = False
-        args = []
-    # log.debug("+++  Delete parser. cmd_line_headless=%s", args.headless)
+    cmd_line_shellfile = args.shellfile
+    cmd_line_shellvar = args.shellvar
+    cmd_line_headless = args.headless
+    args = args.misc
+    log.info(f'{args=}')
 
     engine = '3D'
 
@@ -1904,12 +1889,16 @@ class App(QtCore.QObject):
 
         :return: None
         """
+        caller_name = inspect.stack()[1].function
+        log.debug("+++ Clear log. Calleer=%s",caller_name)
+
         self.pool.close()
 
         self.pool = Pool()
         self.pool_recreated.emit(self.pool)
 
         gc.collect()
+        log.debug("+++ Finish garbage collector")
 
     def install_tools(self):
         """
@@ -3670,12 +3659,12 @@ class App(QtCore.QObject):
         self.log.debug('Pool cleared.')
 
         # quit app by signalling for self.kill_app() method
-        # self.close_app_signal.emit()
-        QtWidgets.qApp.quit()
-        sys.exit(0)
+        self.close_app_signal.emit()
+        # QtWidgets.qApp.quit()
+        # sys.exit(0)
 
         # When the main event loop is not started yet in which case the qApp.quit() will do nothing
-        # we use the following command
+        # we use the following commandе
         # minor_v = sys.version_info.minor
         # if minor_v < 8:
         #     # make sure that the app closes
